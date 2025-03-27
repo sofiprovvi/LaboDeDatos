@@ -173,3 +173,27 @@ def traductor_geringoso (lista: list[str]) -> dict[str,str]:
         res[palabra]=cadena_geringosa1(palabra)
     return res    
 
+
+"""EJERCICIO 9"""
+
+def tablasMultiplicar () -> str:
+    res:str=""
+    n:int=0
+    i:int=0
+    renglon:str=""
+    mult:int=0
+    while n<10:
+          renglon+= str(n) + ": "
+          while i<10:
+            mult+=n
+            renglon+= str(mult) + " "
+            i+=1  
+          i=0 
+          mult=0 
+          renglon+= "\n"
+          res+=renglon
+          renglon=""
+          n+=1   
+    return res
+
+print(tablasMultiplicar())
