@@ -139,7 +139,7 @@ def pagoRapido () -> str:
         meses+=1
     return "El pago total es de " + str(pagar) + " en " + str(meses) + " meses."          
 
-print(pagoRapido())
+
 """
 c. ¿Cuánto pagaría David si agrega $1000 por mes durante cuatro años,
 comenzando en el sexto año de la hipoteca (es decir, luego de 5 años)?
@@ -163,4 +163,13 @@ def pagoMasRapido () -> str:
         meses+=1
     return "El pago total es de " + str(pagar) + " en " + str(meses) + " meses."  
 
-print(pagoMasRapido())
+
+"""EJERCICIO 8
+"""
+
+def traductor_geringoso (lista: list[str]) -> dict[str,str]:
+    res: dict[str,str]={}
+    for palabra in lista:
+        res[palabra]=cadena_geringosa1(palabra)
+    return res    
+
