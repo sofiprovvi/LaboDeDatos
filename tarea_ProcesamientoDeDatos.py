@@ -101,33 +101,44 @@ print(superanSalarioActividad04(empleado_04,15000))
       No afectó en nada.
     
     b)En el caso en que le alteraron el orden de las columnas:
-      Para el (if salario>umbral),tuve que cambiar el índice 
-      de la fila correspondiente al salario. 
-      Luego, por cada fila que cumplía con la condición del if, en 
-      vez de agregarla directamente a res, implementaba una fila nueva 
-      en la que ordenaba los elementos como me pedían.
+    
+      En la función anterior, lo que hice fue fijarme dentro de la 
+      lista de filas, el índice de las filas que correspondiera 
+      al salario. Pero cuando se alteró el orden de las columnas, 
+      ese índice cambió y tuve que modificarlo. 
+      
+      Una vez modificado, por cada salario que fuera mayor al umbral, 
+      en vez de agregar la fila directamente a res como hacía en la
+      función anterior, implementé una fila nueva en la que ordené
+      los elementos de a fila como en la matriz empleado_01. 
       
     
     
-2)¿Y cuando a empleado le cambiaron a forma de representar las 
+2)¿Y cuando a empleado le cambiaron la forma de representar las 
     matrices (de lista de filas a lista de columnas)?
     
-    En las funciones anteriores, lo que hacía era fijarme  
-    el índice de las listas que correspondían al salario, 
-    y con eso hacía un if que si se cumplía, agregaba la fila 
-    a res.
+    Para la matriz como lista de filas, lo que hacía era fijarme  
+    cuál era el índice de las filas que correspondía 
+    al salario.
     
-    En cambio, en la matriz implementada como lista de columnas,
-    tuve que buscar, dentro de la matriz, la lista correspondiente
-    a los salarios. Una vez que la obtenía, me fijaba si el
-    i-ésimo elemento de "salarios" cumplía con la condición; 
-    si cumplía, implementaba la lista "fila" en la que agregaba 
-    el iésimo elemento de cada lista de la matriz. Una vez 
-    que armaba la fila, la agregaba a res.
+    Para la matriz como lista de columnas,en cambio,
+    tuve que fijarme cuál de las listas correspondía al salario. 
+    Con eso me fijaba si el i-ésimo elemento de "salarios" cumplía 
+    con la condición; si cumplía, implementaba la lista "fila" en la 
+    que agregaba el iésimo elemento de cada lista de la matriz. 
+    Una vez terminada la fila nueva, la agregaba a res.
     
-3)¿Cuál es a ventaja desde el punto de vista del usuario de 
+    
+    
+3)¿Cuál es la ventaja desde el punto de vista del usuario de 
   la función, disponer de ella y no escribir directamente 
-  el código de la consulta dentro de su programa?    
+  el código de la consulta dentro de su programa?  
+
+  Una de las mayores ventajas para el usuario de disponer de 
+  la función es el ahorro de tiempo a la hora de programar. 
+  No obstante, antes de utilizar la función en su código, debe 
+  asegurarse de conocer bien sus parámetros de entrada y salida,
+  para no cometer errores en su programa. 
     
 """
 
