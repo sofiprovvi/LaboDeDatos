@@ -17,7 +17,7 @@ import duckdb as dd
 # Importamos los datasets que vamos a utilizar en este programa
 #=============================================================================
 
-carpeta = "~/Desktop/clase06/"
+carpeta = "~/Desktop/LaboDeDatos/clase6_7_8/"
 
 # Ejercicios AR-PROJECT, SELECT, RENAME
 empleado       = pd.read_csv(carpeta+"empleado.csv")
@@ -533,7 +533,7 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # a.- Usando sólo SELECT contar cuántos exámenes fueron rendidos (en total)
     
 consultaSQL = """
-
+               
               """
 
 dataframeResultado = dd.sql(consultaSQL).df()
