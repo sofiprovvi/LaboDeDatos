@@ -206,11 +206,111 @@ df_tipas_parques['ambiente']='parque'
 10) Concatenar los dataframes.
 """
 df_tipas = pd.concat([df_tipas_veredas, df_tipas_parques])
-"""  
-                                            
+
+#%%
+"""                                             
 11. Explorar y analizar sobre la cuestión planteada:
 ¿Hay diferencias entre los ejemplares de una misma especie según si crecen en
 un un parque o en la vereda?
+"""
+
+def promedio_alturaTotal():
+    values = {'altura_tot': 0}
+    df_tipas_noNull = df_tipas.fillna(value=values)
+    size:int=0
+    total:int=0
+    for e in df_tipas_noNull.itertuples():
+       size+=1  
+       total+= e.altura_tot
+    res:float = (total/size)
+    return res
+
+def promedio_alturaTotalParques():
+    values = {'altura_tot': 0}
+    df_tipas_noNull = df_tipas.fillna(value=values)
+    size:int=0
+    total:int=0
+    for e in df_tipas_noNull.itertuples():
+       if e.ambiente=='parque':
+          size+=1  
+          total+= e.altura_tot
+    res:float = (total/size)
+    return res
+
+def promedio_alturaTotalVeredas():
+    values = {'altura_tot': 0}
+    df_tipas_noNull = df_tipas.fillna(value=values)
+    size:int=0
+    total:int=0
+    for e in df_tipas_noNull.itertuples():
+       if e.ambiente=='parque':
+          size+=1  
+          total+= e.altura_tot
+    res:float = (total/size)
+    return res
+
+promedio_AlturaTotalTipas = promedio_alturaTotal()
+promedio_AlturaTotalParquesTipas = promedio_alturaTotalParques()
+promedio_AlturaTotalVeredasTipas = promedio_alturaTotalVeredas()
+
+
+
+def promedio_diametro():
+    values = {'diametro': 0}
+    df_tipas_noNull = df_tipas.fillna(value=values)
+    size:int=0
+    total:int=0
+    for e in df_tipas_noNull.itertuples():
+       size+=1  
+       total+= e.diametro
+    res:float = (total/size)
+    return res
+
+def promedio_diametroParques():
+    values = {'diametro': 0}
+    df_tipas_noNull = df_tipas.fillna(value=values)
+    size:int=0
+    total:int=0
+    for e in df_tipas_noNull.itertuples():
+       if e.ambiente=='parque':
+          size+=1  
+          total+= e.diametro
+    res:float = (total/size)
+    return res
+
+def promedio_diametroVeredas():
+    values = {'diametro': 0}
+    df_tipas_noNull = df_tipas.fillna(value=values)
+    size:int=0
+    total:int=0
+    for e in df_tipas_noNull.itertuples():
+       if e.ambiente=='vereda':
+          size+=1  
+          total+= e.diametro
+    res:float = (total/size)
+    return res 
+
+def masCantidadArbolesEspecie():
+    vereda:int=0
+    parque:int=0
+    for e in df_tipas.itertuples():
+       if e.ambiente=='vereda':
+          vereda+=1
+       else:
+          parque+=1     
+    res = ['vereda: '+ str(vereda),'parque: ' + str(parque)]
+    return res 
+
+promedio_DiametroTipas = promedio_diametro()
+promedio_DiametroParquesTipas = promedio_diametroParques()
+promedio_DiametroVeredasTipas = promedio_diametroVeredas()
+cantidadTipas = masCantidadArbolesEspecie()
+
+"""
+Conclusión tipas: no hay diferencia entre los ejemplares
+de tipas según si crecen en parque o vereda. La única 
+diferencia es que hay muchas más tipas en veredas
+que en parques
 """
 #%%    
 

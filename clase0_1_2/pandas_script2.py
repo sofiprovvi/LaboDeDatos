@@ -162,12 +162,12 @@ df[['nota1', 'nota2']].transform(lambda x: x*10)
 #%% iterar sobre las filas
 df.iterrows()
 
-for e in df.iterrows():
-    print(e)
+#for e in df.iterrows():
+ #   print(e)
 
 for i, e in df.iterrows():
     print(i, e['nombre'])
-
+#%%
 
 df.itertuples()
 
