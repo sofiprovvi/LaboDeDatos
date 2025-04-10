@@ -125,8 +125,7 @@ def especimen_mas_inclinado(lista_arboles:list[dict[str,str]])->tuple[str,float]
     for especie in lista_especies:
         inclinacion = obtener_inclinaciones(lista_arboles, especie)
         maximo = np.array(inclinacion)                                      
-        inclinaciones.append(maximo.max())
-        inclinacion=[]    
+        inclinaciones.append(maximo.max())    
     datos = dict(zip(lista_especies,inclinaciones))
     res: tuple[str,float]=[]
     num=0
@@ -136,22 +135,83 @@ def especimen_mas_inclinado(lista_arboles:list[dict[str,str]])->tuple[str,float]
             res = [clave, num] 
     return res
 #%%    
+"""
+7)
+Volver a combinar las funciones anteriores para escribir la 
+función especie_promedio_mas_inclinada(lista_arboles) que, 
+dada una lista de árboles devuelva la especie que en promedio 
+tiene la mayor inclinación y el promedio calculado.
+Resultados. Debería obtenerse, por ejemplo, que los Álamos 
+Plateados del Parque Los Andes tiene un promedio de 
+inclinación de 25 grados.                                              
+"""                                              
 
+def especie_promedio_mas_inclinada(lista_arboles:list[dict[str,str]])->tuple[str,float]:
+    lista_especies = especies(lista_arboles)
+    promedios:list[float] = []
+    for especie in lista_especies:
+        inclinacion = obtener_inclinaciones(lista_arboles, especie)
+        inclinaciones = np.array(inclinacion)       
+        promedios.append(inclinaciones.sum()/inclinaciones.size)   
+    datos = dict(zip(lista_especies,promedios))
+    res: tuple[str,float]=[]
+    num=0
+    for clave in datos.keys():
+        if (datos[clave]> num):
+            num = datos[clave]
+            res = [clave, num] 
+    return res
+#%%
+"""
+Armar un DataFrame data_arboles_veredas que tenga solamente 
+las siguiente
+columnas: 'nombre_cientifico', 'ancho_acera', 
+'diametro_altura_pecho',
+'altura_arbol' """
 
+import pandas as pd
 
+filename1 = '~/Desktop/LaboDeDatos/clase0_1_2/ejercicios_clase1/arbolado-publico-lineal-2017-2018.csv'
+data_arboles_veredas = pd.read_csv(filename1, usecols=['nombre_cientifico', 'ancho_acera', 'diametro_altura_pecho','altura_arbol'])
+filename2 = '~/Desktop/LaboDeDatos/clase0_1_2/ejercicios_clase1/arbolado-en-espacios-verdes.csv'
+data_arboles_parques = pd.read_csv(filename2, usecols=['nombre_cie', 'inclinacio', 'diametro', 'altura_tot'])
 
+"""
+8)
+Para cada dataset, armar otro seleccionando solamente las filas 
+correspondientes a las tipas (llamalos df_tipas_parques y 
+df_tipas_veredas, respectivamente) y las
+columnas correspondientes al diámetro a la altura del pecho y 
+alturas. Usar como copias (usando .copy()) para poder trabajar 
+en estos nuevos dataframes sin modificar los dataframes grandes
+originales. Renombrar las columnas necesarias
+para que se llamen igual en ambos dataframes. 
+"""
 
-
-
-
-
-
-
-                 
-            
+df_tipas_veredas = data_arboles_veredas[data_arboles_veredas['nombre_cientifico']=='Tipuana tipu']
+df_tipas_parques = data_arboles_parques[data_arboles_parques['nombre_cie']=='Tipuana Tipu']
+df_tipas_veredas = df_tipas_veredas.rename(columns={"diametro_altura_pecho": "diametro","altura_arbol":"altura_tot"})
+df_tipas_parques = df_tipas_parques.rename(columns={"nombre_cie": "nombre_cientifico", "inclinacio":"ancho_acera"})
+                
+"""
+9)
+Agregar a cada dataframe (df_tipas_parques y df_tipas_veredas) 
+una columna llamada 'ambiente' que en un caso valga siempre 
+'parque' y en el otro caso 'vereda'.
+"""
+df_tipas_veredas['ambiente']='vereda'
+df_tipas_parques['ambiente']='parque'
         
-        
-    
-    
+"""
+10) Concatenar los dataframes.
+"""
+df_tipas = pd.concat([df_tipas_veredas, df_tipas_parques])
+"""  
+                                            
+11. Explorar y analizar sobre la cuestión planteada:
+¿Hay diferencias entre los ejemplares de una misma especie según si crecen en
+un un parque o en la vereda?
+"""
+#%%    
 
 
