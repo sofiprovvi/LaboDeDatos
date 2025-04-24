@@ -17,7 +17,7 @@ import duckdb as dd
 # Importamos los datasets que vamos a utilizar en este programa
 #=============================================================================
 
-carpeta = "~/Desktop/LaboDeDatos/clase6_7_8/"
+carpeta = "~/Escritorio/LaboDeDatos/clase6_7_8__Álgebra Relacional_y_SQL/ejercicios_en_clase/"
 
 # Ejercicios AR-PROJECT, SELECT, RENAME
 empleado       = pd.read_csv(carpeta+"empleado.csv")
@@ -533,6 +533,8 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # a.- Usando sólo SELECT contar cuántos exámenes fueron rendidos (en total)
     
 consultaSQL = """
+               SELECT COUNT(*) AS cantidadExamenes
+               FROM examen
                
               """
 
@@ -543,6 +545,9 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # b1.- Usando sólo SELECT contar cuántos exámenes fueron rendidos en cada Instancia
     
 consultaSQL = """
+              SELECT Instancia, COUNT(*) AS cantidadExamenes
+              FROM examen
+              GROUP BY Instancia
 
               """
 
@@ -553,6 +558,10 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # b2.- Usando sólo SELECT contar cuántos exámenes fueron rendidos en cada Instancia (ordenado por instancia)
     
 consultaSQL = """
+              SELECT Instancia, COUNT(*) AS cantidadExamenes
+              FROM examen
+              GROUP BY Instancia
+              ORDER BY Instancia
 
               """
 
@@ -563,6 +572,11 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # b3.- Ídem ejercicio anterior, pero mostrar sólo las instancias a las que asistieron menos de 4 Estudiantes
     
 consultaSQL = """
+              SELECT Instancia, COUNT(*) AS cantidadExamenes
+              FROM examen
+              GROUP BY Instancia
+              HAVING cantidadExamenes < 4
+              ORDER BY Instancia
 
               """
 
@@ -572,7 +586,9 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # c.- Mostrar el promedio de edad de los estudiantes en cada instancia de examen
     
 consultaSQL = """
-
+              SELECT Instancia, AVG(Edad) AS PromedioEdad
+              FROM examen
+              GROUP BY Instancia
               """
 
 dataframeResultado = dd.sql(consultaSQL).df()
@@ -584,7 +600,11 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # a1.- Mostrar cuál fue el promedio de notas en cada instancia de examen, sólo para instancias de parcial.
     
 consultaSQL = """
-
+              SELECT Instancia, AVG(Nota) AS PromedioNota
+              FROM examen
+              WHERE Instancia='Parcial-01' OR Instancia='Parcial-02'
+              GROUP BY Instancia
+              ORDER BY Instancia
               """
 
 dataframeResultado = dd.sql(consultaSQL).df()
@@ -593,6 +613,11 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # a2.- Mostrar cuál fue el promedio de notas en cada instancia de examen, sólo para instancias de parcial. Esta vez usando LIKE.
     
 consultaSQL = """
+              SELECT Instancia, AVG(Nota) AS PromedioNota
+              FROM examen
+              GROUP BY Instancia
+              HAVING Instancia LIKE 'Parcial%'
+              ORDER BY Instancia ASC
 
               """
 
@@ -605,7 +630,17 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # a1.- Listar a cada alumno que rindió el Parcial-01 y decir si aprobó o no (se aprueba con nota >=4).
     
 consultaSQL = """
-
+              SELECT Instancia,
+                     CASE WHEN Nota>=4
+                          THEN 'APROBÓ'
+                          ELSE 'NO APROBÓ'
+                     END AS Estado
+                     WHERE Instancia = 'Parcial-01'
+                     COUNT(*) AS CantidaD
+              FROM examen
+              GROUP BY Instancia,Estado
+              ORDER BY Instancia, Estado
+              
               """
 
 dataframeResultado = dd.sql(consultaSQL).df()
@@ -613,9 +648,19 @@ dataframeResultado = dd.sql(consultaSQL).df()
 
 #%%-----------
 # a2.- Modificar la consulta anterior para que informe cuántos estudiantes aprobaron/reprobaron en cada instancia.
-    
+    #CORREGIR
 consultaSQL = """
-
+               SELECT Instancia,
+                      CASE WHEN Nota>=4
+                           THEN 'APROBÓ'
+                           ELSE 'NO APROBÓ'
+                      END AS Estado
+                      GROUP BY Instancia
+                      COUNT(*) AS Cantidad
+               FROM examen
+               GROUP BY Instancia,Estado
+               ORDER BY Instancia, Estado
+               
               """
 
 dataframeResultado = dd.sql(consultaSQL).df()
@@ -627,7 +672,14 @@ dataframeResultado = dd.sql(consultaSQL).df()
 #a.- Listar los alumnos que en cada instancia obtuvieron una nota mayor al promedio de dicha instancia
 
 consultaSQL = """
-
+              SELECT e1.Instancia,e1.Nombre,e1.Nota
+              FROM examen AS e1
+              WHERE e1.Nota > (
+                   SELECT AVG(e2.Nota) 
+                   FROM examen AS e2
+                   WHERE e1.instancia=e2.instancia
+                   )
+              ORDER BY Instancia, Nombre ASC
               """
 
 
@@ -638,7 +690,14 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # b.- Listar los alumnos que en cada instancia obtuvieron la mayor nota de dicha instancia
 
 consultaSQL = """
-
+              SELECT e1.Instancia,e1.Nombre,e1.Nota
+              FROM examen AS e1
+              WHERE e1.Nota >= ALL (
+                   SELECT(e2.Nota) 
+                   FROM examen AS e2
+                   WHERE e1.instancia=e2.instancia
+                   )
+              ORDER BY Instancia, Nombre ASC
               """
 
 dataframeResultado = dd.sql(consultaSQL).df()
@@ -648,7 +707,14 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # c.- Listar el nombre, instancia y nota sólo de los estudiantes que no rindieron ningún Recuperatorio
 
 consultaSQL = """
-
+              SELECT e1.Instancia,e1.Nombre,e1.Nota
+              FROM examen AS e1
+              WHERE NOT EXISTS (
+                  SELECT *
+                  FROM examen AS e2
+                  where e2.nombre=e1.nombre AND e2.instancia LIKE 'Recu%'
+                  )
+              ORDER BY e1.Nombre,e1.Instancia
               """
 
 dataframeResultado = dd.sql(consultaSQL).df()
@@ -674,7 +740,10 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # a.- Listar todas las tuplas de Examen03 cuyas Notas son menores a 9
 
 consultaSQL = """
-
+               SELECT *
+               from examen03
+               WHERE Nota<=9
+               
               """
 
 dataframeResultado = dd.sql(consultaSQL).df()
@@ -683,7 +752,10 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # b.- Listar todas las tuplas de Examen03 cuyas Notas son mayores o iguales a 9
 
 consultaSQL = """
-
+                    SELECT *
+                    from examen03
+                    WHERE Nota>=9
+                    
               """
 
 
@@ -694,7 +766,15 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # c.- Listar el UNION de todas las tuplas de Examen03 cuyas Notas son menores a 9 y las que son mayores o iguales a 9
 
 consultaSQL = """
-
+              SELECT *
+              from examen03
+              WHERE Nota<9
+              
+              UNION
+              
+              SELECT *
+              from examen03
+              WHERE Nota>9
               """
 
 
@@ -705,6 +785,8 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # d1.- Obtener el promedio de notas
 
 consultaSQL = """
+              SELECT AVG(Notas) as NotaPromedio
+              from examen03
 
               """
 
@@ -716,6 +798,14 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # d2.- Obtener el promedio de notas (tomando a NULL==0)
 
 consultaSQL = """
+              SELECT AVG(
+                  CASE WHEN
+                  Nota IS NULL
+                    THEN 0
+                    ELSE Nota 
+                    END) 
+                    AS NotaPromedio
+              from examen03
 
               """
 
@@ -728,7 +818,8 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # a.- Consigna: Transformar todos los caracteres de las descripciones de los roles a mayúscula
 
 consultaSQL = """
-
+              SELECT EMPLEADO, UPPER(rol) AS rol
+              FROM empleadoRol
               """
 
 dataframeResultado = dd.sql(consultaSQL).df()
@@ -737,6 +828,8 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # b.- Consigna: Transformar todos los caracteres de las descripciones de los roles a minúscula
 
 consultaSQL = """
+              SELECT EMPLEADO, LOWER(rol) AS rol
+              FROM empleadoRol
 
               """
 
@@ -751,6 +844,8 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # a.- Consigna: En la descripción de los roles de los empleados reemplazar las ñ por ni
 
 consultaSQL = """
+              SELECT EMPLEADO, REPLACE(rol,'ni','ñ') AS rol
+              FROM empleadoRol
 
               """
 
@@ -762,16 +857,44 @@ dataframeResultado = dd.sql(consultaSQL).df()
 #=============================================================================
 # a.- Mostrar para cada estudiante las siguientes columnas con sus datos: Nombre, Sexo, Edad, Nota-Parcial-01, Nota-Parcial-02, Recuperatorio-01 y , Recuperatorio-02
 
-# ... Paso 1: Obtenemos los datos de los estudiantes
-consultaSQL = """
+# ... Paso 1: Obtenemos los datos de los estudiantes #TERMINAR
+consultaSQL1 = """
+              SELECT DISTINCT Nombre,Sexo,Edad
+              FROM examen
 
               """
+desafio_01 = dd.sql(consultaSQL1).df()
 
+parcial1 = """
+              SELECT d1.Nombre, d1.Sexo, d1.Edad, e.Nota AS "Parcial-01"
+              FROM desafio_01 AS d1, examen as e
+              WHERE d1.Nombre=e.Nombre AND e.Instancia='Parcial-01'
+              
+              """
 
-desafio_01 = consultaSQL
+parcial2= """
+              SELECT d1.Nombre, d1.Sexo, d1.Edad, e.Nota AS "Parcial-02"
+              FROM desafio_01 AS d1, examen as e
+              WHERE d1.Nombre=e.Nombre AND e.Instancia='Parcial-02'
+              
+              """           
 
+recu1= """
+              SELECT d1.Nombre, d1.Sexo, d1.Edad, e.Nota AS "Recuperatorio-01"
+              FROM desafio_01 AS d1, examen as e
+              WHERE d1.Nombre=e.Nombre AND e.Instancia='Recuperatorio-01'
+              
+              """ 
 
+recu2= """
+             SELECT d1.Nombre, d1.Sexo, d1.Edad, e.Nota AS "Recuperatorio-02"
+                FROM desafio_01 AS d1, examen as e
+                WHERE d1.Nombre=e.Nombre AND e.Instancia='Recuperatorio-02'
+                
+                """             
+              
 
+res = dd.sql(consultaSQL2).df()
 #%% -----------
 # b.- Agregar al ejercicio anterior la columna Estado, que informa si el alumno aprobó la cursada (APROBÓ/NO APROBÓ). Se aprueba con 4.
 
