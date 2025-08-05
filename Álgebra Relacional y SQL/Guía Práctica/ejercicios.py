@@ -8,8 +8,6 @@ Created on Thu Apr 17 13:43:28 2025
 #Importamos bibliotecas:
 import pandas as pd
 import duckdb as dd
-
-
 #%%===========================================================================
 # Importamos los datasets que vamos a utilizar en este programa
 #=============================================================================
@@ -362,7 +360,7 @@ consultaSQL = """
               GROUP BY p.id, Provincia, Año
               ORDER BY Casos DESC
               """
-dataframeResultado = dd.sql(consultaSQL).df()
+dataframeResultadoh = dd.sql(consultaSQL).df()
 #%%
 """
 i. Mostrar la cantidad de casos total, máxima, mínima y promedio 
@@ -551,3 +549,151 @@ consultaSQL = """SELECT  i1.id_depto,
                i1.tipoevento=i2.tipoevento
               """
 dataframeResultado = dd.sql(consultaSQL).df()
+#%%
+#===========================================================================
+# E) SUBCONSULTAS (ALL,ANY):
+#=============================================================================
+"""
+a. Devolver el departamento que tuvo la mayor cantidad de casos 
+sin hacer uso de MAX, ORDER BY ni LIMIT.
+"""
+consultaSQL = """
+               SELECT d.descripcion AS Departamento, 
+                      SUM(c.Cantidad) AS Casos,
+               FROM departamento AS d
+               INNER JOIN casos AS c
+               ON d.id=c.id_depto
+               GROUP BY d.id, Departamento
+              """   
+ea0 = dd.sql(consultaSQL).df()
+
+consultaSQL = """
+               SELECT ea0.Departamento
+               FROM ea0
+               WHERE ea0.Casos >= ALL (SELECT ea02.Casos
+                                       FROM ea0 AS ea02
+                                       WHERE ea02.Departamento!=ea0.Departamento)
+              """   
+
+dataframeResultado = dd.sql(consultaSQL).df()              
+#%%
+"""
+b. Devolver los tipo de evento que tienen casos asociados. 
+(Utilizando ALL o
+ANY).
+"""
+
+consultaSQL = """
+               SELECT te.descripcion AS "Tipo de evento"
+               FROM tipoevento AS te
+               WHERE te.id = ANY(SELECT te.id
+                                 FROM tipoevento AS te,casos AS c
+                                 WHERE c.id_tipoevento=te.id
+                                )
+               
+              """   
+
+dataframeResultado = dd.sql(consultaSQL).df()  
+#%%
+#===========================================================================
+# F) Subconsultas (IN, NOT IN)
+#=============================================================================
+"""
+a. Devolver los tipo de evento que tienen casos asociados 
+(Utilizando IN, NOT IN).
+"""
+
+consultaSQL = """
+               SELECT te.descripcion AS "Tipo de evento"
+               FROM tipoevento AS te
+               WHERE te.id IN(SELECT te.id
+                                 FROM tipoevento AS te,casos AS c
+                                 WHERE c.id_tipoevento=te.id
+                                )
+               
+              """   
+
+dataframeResultado = dd.sql(consultaSQL).df() 
+#%%
+"""
+b. Devolver los tipo de evento que NO tienen casos asociados 
+(Utilizando IN, NOT IN).
+"""
+consultaSQL = """
+               SELECT te.descripcion AS "Tipo de evento"
+               FROM tipoevento AS te
+               WHERE te.id NOT IN(SELECT te.id
+                                 FROM tipoevento AS te,casos AS c
+                                 WHERE c.id_tipoevento=te.id
+                                )
+               
+              """   
+dataframeResultado = dd.sql(consultaSQL).df() 
+#===========================================================================
+# G) Subconsultas (EXISTS, NOT EXISTS)
+#=============================================================================
+"""
+a. Devolver los tipo de evento que tienen casos asociados 
+(Utilizando EXISTS, NOT EXISTS).
+"""
+consultaSQL = """
+               SELECT DISTINCT te.descripcion AS "Tipo de evento"
+               FROM tipoevento AS te
+               WHERE EXISTS(SELECT c.id
+                            FROM casos AS c
+                            WHERE c.id_tipoevento = te.id
+                            )
+               
+              """   
+dataframeResultado = dd.sql(consultaSQL).df() 
+#%%
+"""
+b. Devolver los tipo de evento que NO tienen casos asociados 
+(Utilizando IN, NOT IN).
+"""
+consultaSQL = """
+               SELECT DISTINCT te.descripcion AS "Tipo de evento"
+               FROM tipoevento AS te
+               WHERE NOT EXISTS(SELECT c.id
+                            FROM casos AS c
+                            WHERE c.id_tipoevento = te.id
+                            )
+               
+              """   
+dataframeResultado = dd.sql(consultaSQL).df() 
+#===========================================================================
+# H) Subconsultas correlacionadas
+#=============================================================================
+"""
+a. Listar las provincias que tienen una cantidad total de casos 
+mayor al promedio de casos del país. 
+Hacer el listado agrupado por año.
+"""
+
+consultaSQL = """
+               SELECT h.Provincia, h.Año
+               FROM dataframeResultadoh AS h
+               WHERE h.Casos > (SELECT AVG(h.Casos) 
+                                FROM dataframeResultadoh AS h) 
+              """   
+dataframeResultado = dd.sql(consultaSQL).df() 
+#%%
+"""
+b. Por cada año, listar las provincias que tuvieron una cantidad 
+total de casos mayor a la cantidad total de casos que 
+la provincia de Corrientes.
+"""
+consultaSQL = """
+               SELECT h.Provincia, h.Año
+               FROM dataframeResultadoh AS h
+               WHERE h.Casos > (SELECT SUM(h.Casos) 
+                                FROM dataframeResultadoh AS h
+                                WHERE h.Provincia='Corrientes'
+                                ) 
+              """   
+dataframeResultado = dd.sql(consultaSQL).df() 
+
+
+
+
+
