@@ -17,7 +17,7 @@ import duckdb as dd
 # Importamos los datasets que vamos a utilizar en este programa
 #=============================================================================
 
-carpeta = "~/Escritorio/LaboDeDatos/clase6_7_8__Álgebra Relacional_y_SQL/ejercicios_en_clase/"
+carpeta = ""
 
 # Ejercicios AR-PROJECT, SELECT, RENAME
 empleado       = pd.read_csv(carpeta+"empleado.csv")
@@ -630,15 +630,14 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # a1.- Listar a cada alumno que rindió el Parcial-01 y decir si aprobó o no (se aprueba con nota >=4).
     
 consultaSQL = """
-              SELECT Instancia,
+              SELECT Nombre, Instancia,
                      CASE WHEN Nota>=4
                           THEN 'APROBÓ'
                           ELSE 'NO APROBÓ'
                      END AS Estado
-                     WHERE Instancia = 'Parcial-01'
-                     COUNT(*) AS CantidaD
               FROM examen
-              GROUP BY Instancia,Estado
+              WHERE Instancia = 'Parcial-01'
+              GROUP BY Instancia,Estado,Nombre
               ORDER BY Instancia, Estado
               
               """
@@ -648,17 +647,14 @@ dataframeResultado = dd.sql(consultaSQL).df()
 
 #%%-----------
 # a2.- Modificar la consulta anterior para que informe cuántos estudiantes aprobaron/reprobaron en cada instancia.
-    #CORREGIR
 consultaSQL = """
-               SELECT Instancia,
+               SELECT Nombre, Instancia,
                       CASE WHEN Nota>=4
                            THEN 'APROBÓ'
                            ELSE 'NO APROBÓ'
                       END AS Estado
-                      GROUP BY Instancia
-                      COUNT(*) AS Cantidad
                FROM examen
-               GROUP BY Instancia,Estado
+               GROUP BY Instancia,Estado,Nombre
                ORDER BY Instancia, Estado
                
               """
@@ -728,7 +724,9 @@ dataframeResultado = dd.sql(consultaSQL).df()
 umbralNota = 7
 
 consultaSQL = """
-
+              SELECT Nombre,Instancia,Nota
+              FROM examen
+              WHERE Nota>7
               """
 
 dataframeResultado = dd.sql(consultaSQL).df()
@@ -858,59 +856,119 @@ dataframeResultado = dd.sql(consultaSQL).df()
 # a.- Mostrar para cada estudiante las siguientes columnas con sus datos: Nombre, Sexo, Edad, Nota-Parcial-01, Nota-Parcial-02, Recuperatorio-01 y , Recuperatorio-02
 
 # ... Paso 1: Obtenemos los datos de los estudiantes #TERMINAR
-consultaSQL1 = """
-              SELECT DISTINCT Nombre,Sexo,Edad
-              FROM examen
-
+consultaSQL = """
+              SELECT DISTINCT e.Nombre,e.Sexo,e.Edad,e.Nota AS "Nota-Parcial-01",
+              FROM examen AS e 
+              WHERE Instancia='Parcial-01'
               """
-desafio_01 = dd.sql(consultaSQL1).df()
+parcial1=dd.sql(consultaSQL).df()
+      
+consultaSQL="""
+              SELECT DISTINCT e.Nombre,e.Sexo,e.Edad,e.Nota AS "Nota-Parcial-02",
+              FROM examen AS e
+              WHERE e.Instancia='Parcial-02' 
+            """
+parcial2=dd.sql(consultaSQL).df()
 
-parcial1 = """
-              SELECT d1.Nombre, d1.Sexo, d1.Edad, e.Nota AS "Parcial-01"
-              FROM desafio_01 AS d1, examen as e
-              WHERE d1.Nombre=e.Nombre AND e.Instancia='Parcial-01'
-              
-              """
+consultaSQL="""
+              SELECT DISTINCT e.Nombre,e.Sexo,e.Edad,e.Nota AS "Nota-Recuperatorio-01",
+              FROM examen AS e
+              WHERE Instancia='Recuperatorio-01' 
+         """
+recu1=dd.sql(consultaSQL).df()
 
-parcial2= """
-              SELECT d1.Nombre, d1.Sexo, d1.Edad, e.Nota AS "Parcial-02"
-              FROM desafio_01 AS d1, examen as e
-              WHERE d1.Nombre=e.Nombre AND e.Instancia='Parcial-02'
-              
-              """           
+consultaSQL="""
+             SELECT DISTINCT e.Nombre,e.Sexo,e.Edad,e.Nota AS "Nota-Recuperatorio-02",
+             FROM examen AS e
+             WHERE e.Instancia='Recuperatorio-02'
+         """
+recu2=dd.sql(consultaSQL).df()
 
-recu1= """
-              SELECT d1.Nombre, d1.Sexo, d1.Edad, e.Nota AS "Recuperatorio-01"
-              FROM desafio_01 AS d1, examen as e
-              WHERE d1.Nombre=e.Nombre AND e.Instancia='Recuperatorio-01'
-              
-              """ 
 
-recu2= """
-             SELECT d1.Nombre, d1.Sexo, d1.Edad, e.Nota AS "Recuperatorio-02"
-                FROM desafio_01 AS d1, examen as e
-                WHERE d1.Nombre=e.Nombre AND e.Instancia='Recuperatorio-02'
-                
-                """             
-              
-
-res = dd.sql(consultaSQL2).df()
+consultaSQL="""
+              SELECT DISTINCT p1.Nombre,
+                              p1.Sexo,
+                              p1.Edad,
+                              p1."Nota-Parcial-01",
+                              p2."Nota-Parcial-02",
+                              r1."Nota-Recuperatorio-01",
+                              r2."Nota-Recuperatorio-02",
+              FROM parcial1 AS p1
+              LEFT OUTER JOIN parcial2 AS p2
+              ON p1.Nombre=p2.Nombre 
+              LEFT OUTER JOIN recu1 AS r1
+              ON p1.Nombre=r1.Nombre
+              LEFT OUTER JOIN recu2 AS r2
+              ON p1.Nombre=r2.Nombre
+         """
+         
+desafio1 = dd.sql(consultaSQL).df()
 #%% -----------
 # b.- Agregar al ejercicio anterior la columna Estado, que informa si el alumno aprobó la cursada (APROBÓ/NO APROBÓ). Se aprueba con 4.
 
 consultaSQL = """
-                 
+              SELECT DISTINCT d1.Nombre,
+                              d1.Sexo,
+                              d1.Edad,
+                              d1."Nota-Parcial-01" ,
+                              d1."Nota-Parcial-02",
+                              d1."Nota-Recuperatorio-01",
+                              d1."Nota-Recuperatorio-02",
+                              CASE WHEN 
+                                (d1."Nota-Parcial-01">4 AND d1."Nota-Parcial-02">4) OR 
+                                (d1."Nota-Recuperatorio-01">4 AND d1."Nota-Parcial-02">4) OR
+                                (d1."Nota-Parcial-01">4 AND d1."Nota-Recuperatorio-02">4) OR
+                                (d1."Nota-Recuperatorio-01">4 AND d1."Nota-Recuperatorio-02">4)
+                                THEN 'APROBÓ'
+                                ELSE 'NO APROBÓ'
+                                END AS Estado
+              FROM desafio1 AS d1                  
               """
 
-desafio_02 = dd.sql(consultaSQL).df()
-
-
-
+desafio2 = dd.sql(consultaSQL).df()
 #%% -----------
 # c.- Generar la tabla Examen a partir de la tabla obtenida en el desafío anterior.
-
 consultaSQL = """
+              SELECT Nombre, Sexo, Edad, "Nota-Parcial-01" AS Nota, 'Parcial-01' AS Instancia
+              FROM desafio2
+              WHERE "Nota-Parcial-01" IS NOT NULL
+              
+              UNION 
+              
+              SELECT Nombre, Sexo, Edad, "Nota-Parcial-02" AS Nota, 'Parcial-02' AS Instancia
+              FROM desafio2
+              WHERE "Nota-Parcial-02" IS NOT NULL
+              
+              UNION 
+              
+              SELECT Nombre, Sexo, Edad, "Nota-Recuperatorio-01" AS Nota, 'Recuperatorio-01' AS Instancia
+              FROM desafio2
+              WHERE "Nota-Recuperatorio-01" IS NOT NULL
+              
+              UNION 
+              
+              SELECT Nombre, Sexo, Edad, "Nota-Recuperatorio-02" AS Nota, 'Recuperatorio-02' AS Instancia
+              FROM desafio2
+              WHERE "Nota-Recuperatorio-02" IS NOT NULL
+        """
 
-              """
+desafio3 = dd.sql(consultaSQL).df()
 
-desafio_03 = dd.sql(consultaSQL).df()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
